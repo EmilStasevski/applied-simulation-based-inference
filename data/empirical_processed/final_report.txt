@@ -1,0 +1,85 @@
+==========================================================================
+  FINAL COMPARATIVE ANALYSIS REPORT
+  Generated: 2026-07-13 22:18:33
+  Training epochs: 105 (best val MAE epoch: 75)
+==========================================================================
+
+  SECTION 1: HEAD-TO-HEAD COMPARISON
+  Both methods infer from ESM-2 embeddings (fair comparison).
+
+  Metric                                         FB Baseline       Neural
+  --------------------------------------------- ------------ ------------
+  Mean Absolute Error (helix fraction)                0.3432       0.0808
+  Pearson Correlation with ground truth               0.7136       0.9114
+  90% CI Coverage (raw posterior)                        N/A       38.15%
+  90% CI Coverage (temp-scaled T={best_T:.2f})           N/A       81.55%
+  Mean Posterior Std (raw)                               N/A       0.0333
+  Mean Posterior Std (temp-scaled)                       N/A       0.1400
+
+  >>> Neural method outperforms FB baseline by 76.5% (MAE)
+
+--------------------------------------------------------------------------
+  SECTION 2: POST-HOC TEMPERATURE SCALING
+--------------------------------------------------------------------------
+  Optimal temperature:  T = 4.95
+  Effect: posterior samples stretched by 4.95x around their mean
+  Coverage improvement: 38.1% → 81.5%
+  MAE change:           0.0808 → 0.0800  (unchanged)
+
+  Note: temperature scaling corrects interval WIDTH but not center.
+  The +0.05 systematic bias (from 2-state HMM conflating sheet+coil)
+  remains. A 3-state simulator would fix this at the source.
+
+--------------------------------------------------------------------------
+  SECTION 3: RAW THETA DIAGNOSTICS
+--------------------------------------------------------------------------
+  Raw theta range:         [0.448, 1.126]
+  Fraction outside [0,1]:  12.6%
+
+--------------------------------------------------------------------------
+  SECTION 4: ERROR DECOMPOSITION (bias vs. variance)
+--------------------------------------------------------------------------
+  Mean signed bias:          +0.0533  (over-predicts helix fraction)
+  RMSE:                      0.1210
+  Bias² / MSE:               19.4%
+  Mean |z| (err / post std): 3.79  (calibrated ≈ 0.8)
+  Spread ratio (raw):        3.26x  (1.0 = calibrated)
+  Spread ratio (after T):    0.66x
+
+--------------------------------------------------------------------------
+  SECTION 5: CALIBRATION CURVES
+--------------------------------------------------------------------------
+  Expected →    Raw  →  Temp-Scaled
+     95.0% →  49.7% →  90.3%  ███████████████████████████
+     90.0% →  38.1% →  81.5%  ████████████████████████
+     85.0% →  31.8% →  76.5%  ██████████████████████
+     80.0% →  28.2% →  73.6%  ██████████████████████
+     75.0% →  24.6% →  70.2%  █████████████████████
+     70.0% →  21.9% →  67.4%  ████████████████████
+     65.0% →  19.6% →  63.7%  ███████████████████
+     60.0% →  17.8% →  61.3%  ██████████████████
+     55.0% →  15.8% →  57.9%  █████████████████
+     50.0% →  13.6% →  53.8%  ████████████████
+     45.0% →  11.8% →  49.6%  ██████████████
+     40.0% →  10.7% →  45.4%  █████████████
+     35.0% →   9.0% →  40.8%  ████████████
+     30.0% →   7.8% →  35.4%  ██████████
+     25.0% →   6.6% →  29.8%  ████████
+     20.0% →   5.1% →  25.1%  ███████
+     15.0% →   4.0% →  20.5%  ██████
+     10.0% →   2.6% →  15.3%  ████
+      5.0% →   1.4% →   9.9%  ██
+
+--------------------------------------------------------------------------
+  SECTION 6: TRAINING SUMMARY
+--------------------------------------------------------------------------
+  Total epochs trained:      105
+  Best epoch (val MAE):      75
+  Final training loss:       0.8849
+  Total wall-clock time:     27.3 min
+  Num posterior samples:     100
+  Num test sequences:        2000
+
+==========================================================================
+  END OF REPORT
+==========================================================================
