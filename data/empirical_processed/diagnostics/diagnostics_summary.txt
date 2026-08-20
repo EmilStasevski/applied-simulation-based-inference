@@ -1,0 +1,12 @@
+SBI DIAGNOSTICS SUMMARY
+============================================================
+SBC check (sbi.diagnostics): {'ks_pvals': [0.10078923404216766, 0.07547209411859512], 'c2st_ranks': [0.6583333333333333, 0.6266666666666667], 'c2st_dap': [0.5016666666666667, 0.5066666666666666]}
+TARP simulated: ATC=+0.0013 (0=ideal), KS p=1.0000
+
+Interpretation:
+- SBC/TARP on SIMULATED data test calibration w.r.t. the simulator.
+- The restoration plot overlays REAL-data coverage: the vertical
+  gap below the diagonal is the sim-to-real miscalibration that
+  slide-10 accuracy (MAE 0.084) masks and slide-11 SBC can't see.
+- embedding_ppc.png shows the mechanism: simulator emissions do
+  not match real ESM-2 statistics, so real inputs are OOD.

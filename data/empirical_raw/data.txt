@@ -1,1 +1,1 @@
-put your 2018-06-06-ss.cleaned.csv here from kaggle
+put your 2018-06-06-ss.cleaned.csv here from kaggle https://www.kaggle.com/datasets/alfrandom/protein-secondary-structure

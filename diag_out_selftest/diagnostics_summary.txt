@@ -1,0 +1,30 @@
+======================================================================
+DIAGNOSTICS SUMMARY
+======================================================================
+
+Per-parameter recovery & coverage:
+param             RMSE    68%cov    95%cov
+alpha            0.196       28%       55%
+beta             0.190       29%       54%
+gamma            0.200       30%       50%
+
+SBC check (from check_sbc):
+  ks_pvals: ['0.000', '0.000', '0.000']
+  c2st_ranks: ['0.662', '0.607', '0.678']
+  c2st_dap: ['0.475', '0.460', '0.487']
+
+TARP:
+  ATC (want ~0): -0.077
+  KS p-value (want > 0.05): 0.256
+
+----------------------------------------------------------------------
+AUTOMATIC VERDICT:
+  Posteriors are OVERCONFIDENT (68% CIs cover only 29% on average, should be ~68%).
+  -> This EXPLAINS the mismatch: recovery/RMSE looks great because the MEAN is accurate,
+     but SBC fails because the WIDTH is too small (U-shaped rank histogram expected).
+  LIKELY FIXES, in order:
+     1. Increase simulation budget; check coverage_vs_budget.png.
+     2. Add early stopping / reduce flow capacity (overfit -> collapse).
+     3. Verify prior here == training prior EXACTLY.
+     4. Increase num_posterior_samples if ranks look spiky.
+======================================================================
