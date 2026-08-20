@@ -76,6 +76,14 @@ python compute_embeddings.py    # Phase 2 only
 python pipeline_entry.py        # Phase 3 only (requires phases 1-2 outputs)
 ```
 
+### Calibration diagnostics
+
+```bash
+python diagnostics.py           # Full SBC / TARP / restoration / PPC battery
+```
+
+`diagnostics.py` runs the complete posterior-calibration battery (SBC rank histograms and CDF, TARP, the sim-vs-real restoration plot, the embedding-space posterior predictive check, and a bias/coverage summary) and writes them to `data/empirical_processed/diagnostics/`. Running the module standalone (`python diagnostics.py`) also executes a self-contained toy-Gaussian self-test that reproduces the "good recovery, bad SBC" overconfidence signature, writing to `diag_out_selftest/` — useful for verifying the diagnostics code without the full pipeline.
+
 ---
 
 ## File Structure
@@ -87,13 +95,24 @@ python pipeline_entry.py        # Phase 3 only (requires phases 1-2 outputs)
 ├── compute_embeddings.py    # Phase 2: FASTA -> frozen ESM-2 embeddings
 ├── pipeline_entry.py        # Phase 3: simulator + training + evaluation + report
 ├── hmm_baseline.py          # Fair Forward-Backward baseline (GaussianHMM on embeddings)
+├── diagnostics.py           # SBC / TARP / restoration / PPC calibration battery
 ├── requirements.txt
 ├── README.md
+│
+├── diag_out_selftest/                       # Standalone self-test output (toy Gaussian)
+│   ├── diagnostics_summary.txt
+│   ├── expected_coverage.png
+│   ├── posterior_pairplot.png
+│   ├── posterior_predictive.png
+│   ├── restoration_recovery.png
+│   ├── sbc_rank_cdf.png
+│   ├── sbc_rank_hist.png
+│   └── tarp_coverage.png
 │
 └── data/
     ├── empirical_raw/                       # Raw Kaggle dataset (not tracked)
     │   ├── 2018-06-06-ss.cleaned.csv
-    │   └── 2018-06-06-pdb-intersect-pisces.csv
+    │   └── data.txt
     ├── empirical_processed/                 # All pipeline outputs
     │   ├── test_sequences.fasta             # Phase 1: protein sequences
     │   ├── test_labels.npy                  # Phase 1: ground-truth labels [2000, 512]
@@ -103,7 +122,14 @@ python pipeline_entry.py        # Phase 3 only (requires phases 1-2 outputs)
     │   ├── training_dashboard.png           # Phase 3: 6-panel training health display
     │   ├── calibration_plot.png             # Phase 3: raw vs temp-scaled calibration
     │   ├── helix_scatter_comparison.png     # Phase 3: neural vs baseline scatter
-    │   └── flow_matching_loss.png           # Phase 3: training loss curve
+    │   ├── flow_matching_loss.png           # Phase 3: training loss curve
+    │   └── diagnostics/                     # Calibration battery (from diagnostics.py)
+    │       ├── diagnostics_summary.txt      #   SBC/TARP numeric summary + verdict
+    │       ├── restoration_sim_vs_real.png  #   sim-vs-real coverage (the key plot)
+    │       ├── embedding_ppc.png            #   embedding-space posterior predictive check
+    │       ├── sbc_rank_hist.png            #   SBC rank histograms (per parameter)
+    │       ├── sbc_rank_cdf.png             #   SBC rank ECDF vs uniform band
+    │       └── tarp_simulated.png           #   TARP expected-coverage curve
     └── pdb_cases/                           # Individual PDB structures for case studies
         ├── 1A7F.fasta / 1A7F.pdb
         └── 1CRN.fasta / 1CRN.pdb
@@ -139,7 +165,7 @@ Each row adds one change to the simulator. All other settings held constant.
 
 ## Outputs
 
-After a successful run, `data/empirical_processed/final_report.txt` contains the complete analysis with six sections: head-to-head comparison, temperature scaling details, raw theta diagnostics, error decomposition (bias vs. variance), calibration curves (raw and recalibrated), and training summary. The training dashboard and calibration plot provide the visual evidence.
+After a successful run, `data/empirical_processed/final_report.txt` contains the complete analysis with six sections: head-to-head comparison, temperature scaling details, raw theta diagnostics, error decomposition (bias vs. variance), calibration curves (raw and recalibrated), and training summary. The training dashboard and calibration plot provide the visual evidence, and `data/empirical_processed/diagnostics/` holds the full SBC / TARP / restoration / PPC calibration battery produced by `diagnostics.py`.
 
 ---
 
@@ -150,6 +176,7 @@ After a successful run, `data/empirical_processed/final_report.txt` contains the
 - **Rank-64 covariance** captures only 58-73% of real per-class variance. Higher rank or full covariance (if tractable) would narrow the gap.
 - **Single attention head** in the summary network. Multi-head attention or a small transformer encoder could capture richer sequence-level patterns.
 - **2000 test sequences** from one Kaggle dataset. Validation on the full PDB (~200k chains) would test generalization to rare folds.
+- **Unconstrained output support.** The Flow Matching posterior places ~12.6% of raw samples outside the valid [0, 1] range; a logit-transformed output or a bounded (Beta) base distribution would enforce the constraint by construction.
 
 ---
 
@@ -157,5 +184,7 @@ After a successful run, `data/empirical_processed/final_report.txt` contains the
 
 - Radev, S.T., et al. (2023). BayesFlow: Amortized Bayesian Workflows with Neural Networks.
 - Lin, Z., et al. (2023). Evolutionary-scale prediction of atomic-level protein structure with a language model (ESM-2).
+- Talts, S., et al. (2018). Validating Bayesian Inference Algorithms with Simulation-Based Calibration.
+- Lemos, P., et al. (2023). Sampling-Based Accuracy Testing of Posterior Estimators for General Inference (TARP).
 - Guo, C., et al. (2017). On Calibration of Modern Neural Networks.
 - Kuleshov, V., et al. (2018). Accurate Uncertainties for Deep Learning Using Calibrated Regression.
